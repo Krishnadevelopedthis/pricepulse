@@ -1,0 +1,34 @@
+# Single-server production: Caddy (automatic HTTPS) -> backend -> MongoDB. Only ports 80/443 are public.
+# Run from the repository root:  docker compose -f deploy/docker-compose.prod.yml --env-file .env up -d --build
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [backend]
+  backend:
+    build: ../backend
+    restart: unless-stopped
+    depends_on: [mongo]
+    environment:
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/pricepulse?authSource=admin
+      PRICEPULSE_CORS_ORIGINS: ${PRICEPULSE_CORS_ORIGINS}
+      PRICEPULSE_CHECK_INTERVAL_MINUTES: ${PRICEPULSE_CHECK_INTERVAL_MINUTES:-60}
+    expose: ["8080"]
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes: [mongo-data:/data/db]     # no published ports: reachable only from the backend
+volumes:
+  caddy-data:
+  caddy-config:
+  mongo-data:

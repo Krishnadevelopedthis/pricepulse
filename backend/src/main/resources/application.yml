@@ -1,0 +1,39 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: native   # trust X-Forwarded-* from the platform proxy (Render, Caddy, ...)
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: pricepulse
+  data:
+    mongodb:
+      # Never commit real credentials. Set MONGODB_URI in the environment.
+      uri: ${MONGODB_URI:mongodb://localhost:27017/pricepulse}
+      auto-index-creation: true
+
+pricepulse:
+  rate-limit:
+    enabled: ${PRICEPULSE_RATE_LIMIT_ENABLED:true}
+    per-client-per-minute: 120
+    per-ip-per-minute: 300
+  cors-allowed-origin-patterns: ${PRICEPULSE_CORS_ORIGINS:chrome-extension://*}
+  max-products-per-user: 100
+  scheduler:
+    enabled: ${PRICEPULSE_SCHEDULER_ENABLED:true}
+    tick-ms: 60000              # how often the scheduler looks for due products
+    check-interval-minutes: ${PRICEPULSE_CHECK_INTERVAL_MINUTES:60}
+    max-backoff-exponent: 4     # failed checks back off 2^n * interval, capped at 16x
+    batch-size: 50
+    pool-size: 4
+    queue-capacity: 100
+  fetch:
+    connect-timeout-ms: 5000
+    request-timeout-ms: 10000
+    max-attempts: 3
+    max-body-bytes: 2097152
+    max-redirects: 3
+    allow-private-hosts: ${PRICEPULSE_ALLOW_PRIVATE_HOSTS:false}   # true only for local testing

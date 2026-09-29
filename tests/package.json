@@ -1,0 +1,1 @@
+{ "name": "pricepulse-tests", "private": true, "type": "module", "scripts": { "test": "node --test" }, "devDependencies": { "jsdom": "^24.1.0" } }

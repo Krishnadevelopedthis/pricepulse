@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.pricepulse.academic</groupId>
+  <artifactId>pricepulse-servlets</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <failOnMissingWebXml>false</failOnMissingWebXml>
+  </properties>
+  <dependencies>
+    <!-- Deploy the WAR to Apache Tomcat 10.1 (Jakarta EE 10): the container supplies servlet/JSP APIs. -->
+    <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><version>6.0.0</version><scope>provided</scope></dependency>
+    <dependency><groupId>jakarta.servlet.jsp</groupId><artifactId>jakarta.servlet.jsp-api</artifactId><version>3.1.1</version><scope>provided</scope></dependency>
+    <!-- JSTL is not bundled with Tomcat, so it ships inside the WAR. -->
+    <dependency><groupId>org.glassfish.web</groupId><artifactId>jakarta.servlet.jsp.jstl</artifactId><version>3.0.1</version></dependency>
+    <dependency><groupId>jakarta.servlet.jsp.jstl</groupId><artifactId>jakarta.servlet.jsp.jstl-api</artifactId><version>3.0.0</version></dependency>
+    <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><version>42.7.4</version></dependency>
+  </dependencies>
+  <build>
+    <finalName>pricepulse-academic</finalName>
+    <plugins>
+      <!-- Reuse the DAO/Db/PriceRecord classes from the JDBC module instead of duplicating them. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId><artifactId>build-helper-maven-plugin</artifactId><version>3.6.0</version>
+        <executions><execution><phase>generate-sources</phase><goals><goal>add-source</goal></goals>
+          <configuration><sources><source>../jdbc/src/main/java</source></sources></configuration></execution></executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

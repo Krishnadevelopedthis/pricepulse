@@ -1,0 +1,20 @@
+# Local development: MongoDB + backend.   docker compose up --build
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-pricepulse}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-devpassword}
+    volumes: [mongo-data:/data/db]
+    ports: ["127.0.0.1:27017:27017"]   # localhost only
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on: [mongo]
+    environment:
+      MONGODB_URI: mongodb://${MONGO_USER:-pricepulse}:${MONGO_PASSWORD:-devpassword}@mongo:27017/pricepulse?authSource=admin
+      PRICEPULSE_CORS_ORIGINS: ${PRICEPULSE_CORS_ORIGINS:-chrome-extension://*}
+    ports: ["8080:8080"]
+volumes:
+  mongo-data:

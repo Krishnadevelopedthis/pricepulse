@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PricePulse</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--accent)"/><path d="M3.5 13h4l2.2-6 3.6 11 2.4-5h4.8" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>PricePulse</span>
+    </div>
+    <button id="openOptions" class="icon-btn" type="button" aria-label="Open tracked products and settings" title="Tracked products &amp; settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </header>
+
+  <div id="banner" class="banner" role="status" hidden></div>
+
+  <main>
+    <section id="stateLoading" class="state" aria-live="polite"><span class="spinner"></span><span>Checking product…</span></section>
+
+    <section id="stateMessage" class="state message" hidden>
+      <p id="messageText" class="message-text" role="alert"></p>
+      <p id="messageHelp" class="hint"></p>
+      <div class="actions">
+        <button id="manualBtn" class="btn secondary" type="button" hidden>Enter price manually</button>
+        <button id="retryBtn" class="btn secondary" type="button">Try again</button>
+      </div>
+    </section>
+
+    <section id="stateProduct" hidden>
+      <div class="card">
+        <p id="domain" class="domain"></p>
+        <h1 id="productName" class="product-name"></h1>
+        <div class="price-row">
+          <span id="price" class="price"></span>
+          <span id="statusTag" class="tag">Product detected</span>
+        </div>
+        <p id="changeLine" class="change flat" hidden></p>
+        <p id="metaLine" class="meta"></p>
+      </div>
+
+      <div id="manualBox" class="form-grid" hidden style="margin-top:12px">
+        <div class="two-col">
+          <div>
+            <label for="manualPrice">Price shown on the page</label>
+            <input id="manualPrice" type="text" inputmode="decimal" autocomplete="off" aria-describedby="manualError">
+          </div>
+          <div>
+            <label for="manualCurrency">Currency</label>
+            <select id="manualCurrency"></select>
+          </div>
+        </div>
+        <p id="manualError" class="field-error" role="alert"></p>
+      </div>
+
+      <div class="form-grid" style="margin-top:12px">
+        <div>
+          <label for="target">Target price</label>
+          <div class="affix" id="targetAffix"><span id="targetCur">₹</span><input id="target" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 4999" aria-describedby="targetError"></div>
+          <p id="targetError" class="field-error" role="alert"></p>
+          <p id="targetHint" class="hint">You will be notified when the price reaches or drops below this.</p>
+        </div>
+        <div class="actions">
+          <button id="trackBtn" class="btn primary" type="button">Track Price</button>
+          <button id="historyBtn" class="btn secondary" type="button">View History</button>
+        </div>
+        <div id="sparkline"></div>
+        <p id="trendNote" class="trend-note" hidden></p>
+        <button id="removeBtn" class="btn danger" type="button" hidden>Remove Tracking</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="../shared/pricecore.js"></script>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PricePulse</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="page-head">
+    <div class="wrap head-row">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--accent)"/><path d="M3.5 13h4l2.2-6 3.6 11 2.4-5h4.8" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>PricePulse</span>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab" role="tab" id="tab-products" data-view="products" aria-controls="view-products">Tracked products</button>
+        <button class="tab" role="tab" id="tab-history" data-view="history" aria-controls="view-history">Price history</button>
+        <button class="tab" role="tab" id="tab-settings" data-view="settings" aria-controls="view-settings">Settings</button>
+      </nav>
+      <span id="serverStatus" class="tag muted" title="Backend connection">Checking server…</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="pageBanner" class="banner" role="status" hidden></div>
+
+    <section id="view-products" role="tabpanel" aria-labelledby="tab-products" hidden>
+      <div id="productsEmpty" class="empty" hidden>
+        <h2>No tracked products yet.</h2>
+        <p>Open a product page, click the PricePulse icon, set a target price and choose Track Price.</p>
+      </div>
+      <div id="productList" class="product-list"></div>
+    </section>
+
+    <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="history-head">
+        <div>
+          <label for="historyProduct">Product</label>
+          <select id="historyProduct"></select>
+        </div>
+      </div>
+      <div id="historyEmpty" class="empty" hidden><h2>No tracked products yet.</h2><p>Track a product to see its price history here.</p></div>
+      <div id="historyBody" hidden>
+        <div class="card">
+          <div id="historyChart"></div>
+          <p id="historyTrend" class="trend-note"></p>
+        </div>
+        <div id="statGrid" class="stat-grid"></div>
+        <div class="card table-card">
+          <h2 class="card-title">Recorded prices</h2>
+          <div class="table-scroll"><table id="historyTable"><thead><tr><th scope="col">Checked</th><th scope="col">Price</th><th scope="col">Source</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+      <div class="card settings">
+        <h2 class="card-title">Notifications</h2>
+        <label class="check"><input type="checkbox" id="setNotifications"> Show browser notifications</label>
+        <label class="check"><input type="checkbox" id="setDrops"> Notify on any price drop</label>
+        <label class="check"><input type="checkbox" id="setIncreases"> Notify on price increases</label>
+        <p class="hint">Reaching your target price always notifies while notifications are on. Notifications appear only while Chrome is running; the server keeps checking prices when it is closed and Chrome catches up on startup.</p>
+        <div class="row-actions"><button id="testNotif" class="btn secondary small" type="button">Send test notification</button></div>
+
+        <h2 class="card-title" style="margin-top:20px">Sync</h2>
+        <label for="setSync">Check for new alerts every</label>
+        <select id="setSync"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option></select>
+        <p id="syncStatus" class="hint"></p>
+        <p class="hint">Install ID (needed if you ask for your data to be deleted): <code id="installId"></code></p>
+
+        <div id="serverGroup">
+          <h2 class="card-title" style="margin-top:20px">Server</h2>
+          <label for="setBackend">Backend URL</label>
+          <input id="setBackend" type="url" autocomplete="off" aria-describedby="backendError">
+          <p id="backendError" class="field-error" role="alert"></p>
+        </div>
+        <div class="row-actions"><button id="saveSettings" class="btn primary" type="button">Save settings</button></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../shared/pricecore.js"></script>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
