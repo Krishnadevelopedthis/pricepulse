@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SoundMax Wireless Headphones - TechMart Demo Store</title>
+
+  <!--
+    PricePulse reads the product price from this JSON-LD block.
+    The backend (Render) reads only this static text, it does not run JavaScript.
+    To change the price for the server check: edit "price" below, commit, push, wait for GitHub Pages.
+    The "Change price" box on the page changes it instantly in the browser.
+  -->
+  <script type="application/ld+json" id="product-jsonld">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "SoundMax Wireless Headphones",
+    "sku": "SM-100",
+    "description": "Demo product made for the PricePulse project.",
+    "offers": {
+      "@type": "Offer",
+      "price": "30000",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f1f1;
+      color: #222;
+    }
+    header {
+      background: #1f3a68;
+      color: white;
+      padding: 14px 20px;
+    }
+    header h2 { margin: 0; font-size: 22px; }
+    header span { font-size: 13px; opacity: 0.8; }
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 12px;
+    }
+    .box {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .product { display: flex; flex-wrap: wrap; gap: 24px; }
+    .product .image { flex: 1 1 320px; text-align: center; }
+    .product .image svg { width: 100%; max-width: 360px; height: auto; background: #eef2f7; border: 1px solid #ddd; }
+    .product .info { flex: 1 1 320px; }
+
+    h1 { font-size: 24px; margin: 0 0 8px 0; }
+    .stock { color: green; font-size: 14px; margin: 0 0 12px 0; }
+    .price { font-size: 32px; font-weight: bold; color: #b12704; margin: 8px 0 0 0; }
+    .old-price { color: #777; font-size: 16px; margin-left: 8px; }
+    .save { color: green; font-size: 14px; margin: 4px 0 0 0; }
+    .small { font-size: 13px; color: #555; margin: 4px 0 14px 0; }
+
+    button {
+      font-size: 15px;
+      padding: 9px 16px;
+      border: 1px solid #888;
+      background: #f0f0f0;
+      cursor: pointer;
+    }
+    button:hover { background: #e2e2e2; }
+    .buy { background: #ff9900; border-color: #cc7a00; font-weight: bold; }
+    .buy:hover { background: #f08f00; }
+    #msg { color: #555; font-size: 13px; min-height: 18px; margin-top: 10px; }
+
+    ul { padding-left: 20px; line-height: 1.7; margin: 8px 0 0 0; }
+    table { border-collapse: collapse; width: 100%; }
+    td { border: 1px solid #ddd; padding: 8px 10px; font-size: 14px; }
+    td:first-child { background: #f7f7f7; width: 35%; }
+
+    .demo-box { background: #fff8d6; border: 2px dashed #d4a800; }
+    .demo-box h3 { margin: 0 0 6px 0; font-size: 16px; }
+    .demo-box p { margin: 0 0 10px 0; font-size: 13px; color: #555; }
+    .demo-box input { font-size: 15px; padding: 7px; width: 120px; }
+    .row { margin-bottom: 10px; }
+
+    footer { text-align: center; font-size: 12px; color: #777; padding: 10px 0 30px 0; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>TechMart <span>demo store</span></h2>
+  </header>
+
+  <div class="container">
+
+    <div class="box product">
+      <div class="image">
+        <!-- simple headphone drawing (SVG) -->
+        <svg viewBox="0 0 400 360" role="img" aria-label="Headphones">
+          <path d="M80 190 C80 40 320 40 320 190" fill="none" stroke="#333b4d" stroke-width="22" stroke-linecap="round"/>
+          <path d="M100 190 C100 70 300 70 300 190" fill="none" stroke="#c5ccd8" stroke-width="9" stroke-linecap="round"/>
+          <rect x="52" y="170" width="76" height="130" rx="36" fill="#333b4d"/>
+          <rect x="272" y="170" width="76" height="130" rx="36" fill="#333b4d"/>
+          <rect x="116" y="182" width="24" height="106" rx="12" fill="#dfe4ec"/>
+          <rect x="260" y="182" width="24" height="106" rx="12" fill="#dfe4ec"/>
+          <circle cx="82" cy="235" r="20" fill="none" stroke="#2f6fdb" stroke-width="4"/>
+          <circle cx="318" cy="235" r="20" fill="none" stroke="#2f6fdb" stroke-width="4"/>
+          <ellipse cx="200" cy="330" rx="130" ry="10" fill="#000" opacity="0.08"/>
+        </svg>
+      </div>
+
+      <div class="info">
+        <h1>SoundMax Wireless Headphones</h1>
+        <p class="stock">In stock</p>
+
+        <p class="price">
+          <span id="price">₹30,000</span>
+          <span class="old-price" id="oldWrap" hidden><s id="oldPrice">₹30,000</s></span>
+        </p>
+        <p class="save" id="save" hidden></p>
+        <p class="small">Inclusive of all taxes. Free delivery.</p>
+
+        <button class="buy" id="cartBtn" type="button">Add to cart</button>
+        <button id="buyBtn" type="button">Buy now</button>
+        <div id="msg"></div>
+      </div>
+    </div>
+
+    <div class="box demo-box" id="priceBox">
+      <h3>Change price (for project demo)</h3>
+      <p>Type a new price and press Update. PricePulse will see the new price when you open its popup again.</p>
+      <div class="row">
+        <input type="number" id="newPrice" min="1" value="28000">
+        <button type="button" id="setBtn">Update price</button>
+        <button type="button" id="resetBtn">Reset to ₹30,000</button>
+      </div>
+      <div>
+        <button type="button" data-delta="-500">- ₹500</button>
+        <button type="button" data-delta="-2000">- ₹2,000</button>
+        <button type="button" data-delta="1000">+ ₹1,000</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Highlights</h3>
+      <ul>
+        <li>Noise cancelling</li>
+        <li>40 hours battery life</li>
+        <li>Bluetooth 5.3 and 3.5 mm cable support</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Specifications</h3>
+      <table>
+        <tr><td>Type</td><td>Over-ear</td></tr>
+        <tr><td>Driver size</td><td>40 mm</td></tr>
+        <tr><td>Battery</td><td>Up to 40 hours</td></tr>
+        <tr><td>Connectivity</td><td>Bluetooth 5.3, 3.5 mm cable</td></tr>
+        <tr><td>Weight</td><td>250 g</td></tr>
+        <tr><td>Colour</td><td>Black</td></tr>
+      </table>
+    </div>
+
+  </div>
+
+  <footer>Demo page made for the PricePulse college project. This is not a real shop.</footer>
+
+<script>
+  var STORAGE_KEY = 'pricepulse-demo-price';
+  var jsonLd = document.getElementById('product-jsonld');
+  var data = JSON.parse(jsonLd.textContent);
+  var listedPrice = Number(data.offers.price);
+
+  function money(n) {
+    return '₹' + Number(n).toLocaleString('en-IN');
+  }
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  // Updates the price on the page AND in the JSON-LD, because PricePulse reads the JSON-LD.
+  function setPrice(value, save) {
+    var p = Math.round(Number(value));
+    if (!isFinite(p) || p < 1 || p > 9999999) {
+      return;
+    }
+
+    data.offers.price = String(p);
+    jsonLd.textContent = JSON.stringify(data, null, 2);
+
+    byId('price').textContent = money(p);
+    byId('newPrice').value = p;
+
+    var cheaper = p < listedPrice;
+    byId('oldWrap').hidden = !cheaper;
+    byId('save').hidden = !cheaper;
+    if (cheaper) {
+      var off = listedPrice - p;
+      byId('oldPrice').textContent = money(listedPrice);
+      byId('save').textContent = 'You save ' + money(off) + ' (' + Math.round(off * 100 / listedPrice) + '% off)';
+    }
+
+    if (save) {
+      try { localStorage.setItem(STORAGE_KEY, String(p)); } catch (e) { }
+    }
+  }
+
+  function currentPrice() {
+    return Number(data.offers.price);
+  }
+
+  byId('setBtn').addEventListener('click', function () {
+    setPrice(byId('newPrice').value, true);
+  });
+
+  byId('resetBtn').addEventListener('click', function () {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+    setPrice(listedPrice, false);
+  });
+
+  var quickButtons = document.querySelectorAll('button[data-delta]');
+  for (var i = 0; i < quickButtons.length; i++) {
+    quickButtons[i].addEventListener('click', function () {
+      setPrice(currentPrice() + Number(this.getAttribute('data-delta')), true);
+    });
+  }
+
+  function demoMessage() {
+    byId('msg').textContent = 'This is a demo page, so ordering is not available.';
+  }
+  byId('cartBtn').addEventListener('click', demoMessage);
+  byId('buyBtn').addEventListener('click', demoMessage);
+
+  // keep the last price after a page reload
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      setPrice(saved, false);
+    }
+  } catch (e) { }
+</script>
+</body>
+</html>
