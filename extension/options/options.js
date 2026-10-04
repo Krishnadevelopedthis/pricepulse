@@ -8,7 +8,11 @@ const $ = (id) => document.getElementById(id);
 const VIEWS = ['products', 'history', 'settings'];
 let products = [];
 
-const SOURCE_LABEL = { BROWSER_INITIAL: 'Browser (start)', BROWSER: 'Browser', SERVER: 'Server check' };
+const SOURCE_LABEL = {
+  BROWSER_INITIAL: 'Browser (price when tracking started)',
+  BROWSER: 'Browser (price seen on the product page)',
+  SERVER: 'Server check (backend fetched the page)'
+};
 
 function banner(text, kind = '') {
   const b = $('pageBanner');
@@ -178,10 +182,42 @@ async function loadSettings() {
   $('backendError').textContent = '';
   // Store builds ship without optional host permissions, so the server address is fixed and the field is hidden.
   $('serverGroup').hidden = !chrome.runtime.getManifest().optional_host_permissions;
-  $('installId').textContent = await getClientId();
+  await renderInstallId(false);
+  await renderSyncStatus();
+}
+
+async function renderSyncStatus() {
   const st = await getSyncStatus();
   $('syncStatus').textContent = st ? (st.ok ? `Last sync ${timeAgo(st.at)}.` : `Last sync failed ${timeAgo(st.at)}: ${st.error}`) : 'No sync has run yet.';
 }
+
+// The install id acts like a private key for this install's data, so it is masked until the user asks to see it.
+async function renderInstallId(reveal) {
+  const id = await getClientId();
+  $('installId').textContent = reveal ? id : `${id.slice(0, 4)}••••••••••••••••••••••••••••${id.slice(-4)}`;
+  $('toggleInstallId').textContent = reveal ? 'Hide' : 'Show';
+  $('toggleInstallId').dataset.revealed = reveal ? '1' : '';
+}
+
+$('toggleInstallId').addEventListener('click', () => renderInstallId(!$('toggleInstallId').dataset.revealed));
+
+$('copyInstallId').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(await getClientId());
+    banner('Install ID copied.', 'ok');
+  } catch { banner('Could not copy. Click Show and copy it manually.', 'error'); }
+});
+
+$('syncNow').addEventListener('click', async () => {
+  const btn = $('syncNow');
+  btn.classList.add('loading'); btn.disabled = true;
+  try {
+    const res = await chrome.runtime.sendMessage({ type: 'sync-now' });
+    if (res && res.ok) banner(res.count ? `Sync done: ${res.count} alert(s) received.` : 'Sync done: no new alerts.', 'ok');
+    else banner(res && res.offline ? 'PricePulse server is currently unavailable.' : 'Sync failed. Check the server address.', 'error');
+  } catch { banner('Sync failed. Try again.', 'error'); }
+  finally { btn.classList.remove('loading'); btn.disabled = false; await renderSyncStatus(); }
+});
 
 function validateBackend(raw) {
   const v = Core.validateUrl(raw);

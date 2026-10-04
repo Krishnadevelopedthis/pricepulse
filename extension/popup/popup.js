@@ -270,8 +270,12 @@ async function load() {
 
   if (state.tracked) {
     // Report what this browser sees; it works even when the server cannot read the page.
+    // Record on a price change, and also when the last check is older than 5 minutes so the history keeps growing
+    // even while the price is stable (otherwise "Checks recorded" would stay at 1).
     const d = state.detection;
-    if (d.found && d.currency === state.tracked.currency && Number(d.price) !== Number(state.tracked.currentPrice)) {
+    const changed = d.found && Number(d.price) !== Number(state.tracked.currentPrice);
+    const stale = Date.now() - new Date(state.tracked.lastCheckedAt).getTime() > 5 * 60 * 1000;
+    if (d.found && d.currency === state.tracked.currency && (changed || stale)) {
       try { state.tracked = await api.observe(state.tracked.id, Number(d.price), d.currency); } catch { /* keep last known state */ }
     }
     await renderTracked();

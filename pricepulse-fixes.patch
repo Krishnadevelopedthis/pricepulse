@@ -1,0 +1,98 @@
+diff --git a/extension/options/options.html b/extension/options/options.html
+index 1e5d2a6..91732da 100644
+--- a/extension/options/options.html
++++ b/extension/options/options.html
+@@ -68,7 +68,12 @@
+         <label for="setSync">Check for new alerts every</label>
+         <select id="setSync"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option></select>
+         <p id="syncStatus" class="hint"></p>
+-        <p class="hint">Install ID (needed if you ask for your data to be deleted): <code id="installId"></code></p>
++        <div class="row-actions"><button id="syncNow" class="btn secondary small" type="button">Sync now</button></div>
++        <p class="hint">Install ID (private: it identifies your data on the server and is needed if you ask for it to be deleted): <code id="installId"></code></p>
++        <div class="row-actions">
++          <button id="toggleInstallId" class="btn secondary small" type="button">Show</button>
++          <button id="copyInstallId" class="btn secondary small" type="button">Copy</button>
++        </div>
+ 
+         <div id="serverGroup">
+           <h2 class="card-title" style="margin-top:20px">Server</h2>
+diff --git a/extension/options/options.js b/extension/options/options.js
+index 7c4dc8f..869eb88 100644
+--- a/extension/options/options.js
++++ b/extension/options/options.js
+@@ -8,7 +8,11 @@ const $ = (id) => document.getElementById(id);
+ const VIEWS = ['products', 'history', 'settings'];
+ let products = [];
+ 
+-const SOURCE_LABEL = { BROWSER_INITIAL: 'Browser (start)', BROWSER: 'Browser', SERVER: 'Server check' };
++const SOURCE_LABEL = {
++  BROWSER_INITIAL: 'Browser (price when tracking started)',
++  BROWSER: 'Browser (price seen on the product page)',
++  SERVER: 'Server check (backend fetched the page)'
++};
+ 
+ function banner(text, kind = '') {
+   const b = $('pageBanner');
+@@ -178,11 +182,43 @@ async function loadSettings() {
+   $('backendError').textContent = '';
+   // Store builds ship without optional host permissions, so the server address is fixed and the field is hidden.
+   $('serverGroup').hidden = !chrome.runtime.getManifest().optional_host_permissions;
+-  $('installId').textContent = await getClientId();
++  await renderInstallId(false);
++  await renderSyncStatus();
++}
++
++async function renderSyncStatus() {
+   const st = await getSyncStatus();
+   $('syncStatus').textContent = st ? (st.ok ? `Last sync ${timeAgo(st.at)}.` : `Last sync failed ${timeAgo(st.at)}: ${st.error}`) : 'No sync has run yet.';
+ }
+ 
++// The install id acts like a private key for this install's data, so it is masked until the user asks to see it.
++async function renderInstallId(reveal) {
++  const id = await getClientId();
++  $('installId').textContent = reveal ? id : `${id.slice(0, 4)}••••••••••••••••••••••••••••${id.slice(-4)}`;
++  $('toggleInstallId').textContent = reveal ? 'Hide' : 'Show';
++  $('toggleInstallId').dataset.revealed = reveal ? '1' : '';
++}
++
++$('toggleInstallId').addEventListener('click', () => renderInstallId(!$('toggleInstallId').dataset.revealed));
++
++$('copyInstallId').addEventListener('click', async () => {
++  try {
++    await navigator.clipboard.writeText(await getClientId());
++    banner('Install ID copied.', 'ok');
++  } catch { banner('Could not copy. Click Show and copy it manually.', 'error'); }
++});
++
++$('syncNow').addEventListener('click', async () => {
++  const btn = $('syncNow');
++  btn.classList.add('loading'); btn.disabled = true;
++  try {
++    const res = await chrome.runtime.sendMessage({ type: 'sync-now' });
++    if (res && res.ok) banner(res.count ? `Sync done: ${res.count} alert(s) received.` : 'Sync done: no new alerts.', 'ok');
++    else banner(res && res.offline ? 'PricePulse server is currently unavailable.' : 'Sync failed. Check the server address.', 'error');
++  } catch { banner('Sync failed. Try again.', 'error'); }
++  finally { btn.classList.remove('loading'); btn.disabled = false; await renderSyncStatus(); }
++});
++
+ function validateBackend(raw) {
+   const v = Core.validateUrl(raw);
+   if (!v.ok) return v;
+diff --git a/extension/popup/popup.js b/extension/popup/popup.js
+index 06b629f..913b747 100644
+--- a/extension/popup/popup.js
++++ b/extension/popup/popup.js
+@@ -270,8 +270,12 @@ async function load() {
+ 
+   if (state.tracked) {
+     // Report what this browser sees; it works even when the server cannot read the page.
++    // Record on a price change, and also when the last check is older than 5 minutes so the history keeps growing
++    // even while the price is stable (otherwise "Checks recorded" would stay at 1).
+     const d = state.detection;
+-    if (d.found && d.currency === state.tracked.currency && Number(d.price) !== Number(state.tracked.currentPrice)) {
++    const changed = d.found && Number(d.price) !== Number(state.tracked.currentPrice);
++    const stale = Date.now() - new Date(state.tracked.lastCheckedAt).getTime() > 5 * 60 * 1000;
++    if (d.found && d.currency === state.tracked.currency && (changed || stale)) {
+       try { state.tracked = await api.observe(state.tracked.id, Number(d.price), d.currency); } catch { /* keep last known state */ }
+     }
+     await renderTracked();

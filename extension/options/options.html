@@ -68,7 +68,12 @@
         <label for="setSync">Check for new alerts every</label>
         <select id="setSync"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option></select>
         <p id="syncStatus" class="hint"></p>
-        <p class="hint">Install ID (needed if you ask for your data to be deleted): <code id="installId"></code></p>
+        <div class="row-actions"><button id="syncNow" class="btn secondary small" type="button">Sync now</button></div>
+        <p class="hint">Install ID (private: it identifies your data on the server and is needed if you ask for it to be deleted): <code id="installId"></code></p>
+        <div class="row-actions">
+          <button id="toggleInstallId" class="btn secondary small" type="button">Show</button>
+          <button id="copyInstallId" class="btn secondary small" type="button">Copy</button>
+        </div>
 
         <div id="serverGroup">
           <h2 class="card-title" style="margin-top:20px">Server</h2>
