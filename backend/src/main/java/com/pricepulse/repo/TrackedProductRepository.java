@@ -16,4 +16,5 @@ public interface TrackedProductRepository extends MongoRepository<TrackedProduct
     long countByUserId(String userId);
     List<TrackedProduct> findByStatusAndNextCheckAtLessThanEqual(TrackingStatus status, Instant now, Pageable page);
     List<TrackedProduct> findByUserIdAndNotificationPendingTypeNotNull(String userId);
+    List<TrackedProduct> findByNormalizedUrlContaining(String fragment);
 }

@@ -173,7 +173,10 @@ public class ProductService {
             p.setNextCheckAt(now.plus(Duration.ofMinutes(props.scheduler().checkIntervalMinutes())));
             updateNotification(p, change.direction(), price, before, now);
 
-            history.save(new PriceObservation(p.getId(), price, currency, now, p.getDomain(), source));
+            // Only a real change adds a history row; re-reading the same price must not repeat it.
+            if (change.direction() != Direction.UNCHANGED) {
+                history.save(new PriceObservation(p.getId(), price, currency, now, p.getDomain(), source));
+            }
             return products.save(p);
         });
     }

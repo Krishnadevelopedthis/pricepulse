@@ -139,14 +139,22 @@ async function loadHistoryView(id) {
   await renderHistory(sel.value);
 }
 
-async function renderHistory(id) {
+// quiet = true is used by the automatic refresh: no loading text, and a failed refresh keeps the old chart.
+async function renderHistory(id, quiet = false) {
   const p = products.find((x) => x.id === id);
   if (!p) return;
   const chart = $('historyChart');
-  chart.replaceChildren(h('p', { class: 'chart-empty' }, 'Loading price history…'));
+  if (!quiet) chart.replaceChildren(h('p', { class: 'chart-empty' }, 'Loading price history…'));
   try {
     const hist = await api.history(id, 500);
-    const series = renderLineChart(chart, hist.points, { currency: p.currency, formatMoney: money });
+    // Unchanged prices are stored once; extend the line to the last check so it stays flat up to "now".
+    const chartPoints = [...hist.points];
+    const last = chartPoints[chartPoints.length - 1];
+    if (last && p.lastCheckedAt && Number(last.price) === Number(p.currentPrice)
+        && new Date(p.lastCheckedAt) > new Date(last.observedAt)) {
+      chartPoints.push({ observedAt: p.lastCheckedAt, price: last.price, source: last.source });
+    }
+    const series = renderLineChart(chart, chartPoints, { currency: p.currency, formatMoney: money });
     const s = hist.stats;
     $('historyTrend').textContent = series.data.length < 2 ? EMPTY_TREND_TEXT
       : series.trend === 'DECREASING' ? 'Trend: the latest check is lower than the one before.'
@@ -165,9 +173,31 @@ async function renderHistory(id) {
     body.replaceChildren(...[...hist.points].reverse().slice(0, 50).map((pt) =>
       h('tr', {}, h('td', {}, new Date(pt.observedAt).toLocaleString()), h('td', { class: 'num' }, money(pt.price, p.currency)), h('td', {}, SOURCE_LABEL[pt.source] || pt.source))));
   } catch (e) {
+    if (quiet) return;
     chart.replaceChildren(h('p', { class: 'chart-empty' }, e instanceof ApiError && e.offline ? 'PricePulse server is currently unavailable.' : errorText(e)));
   }
 }
+
+// Auto refresh: while the Price history tab is open, reload the data every 15 seconds so a new price
+// recorded by the server (or by the popup) shows up in the graph without pressing F5.
+async function refreshHistoryQuietly() {
+  if (document.hidden || parseHash().view !== 'history') return;
+  const id = $('historyProduct').value;
+  if (!id) return;
+  try { products = await api.listProducts(); } catch { return; }
+  await renderHistory(id, true);
+}
+setInterval(refreshHistoryQuietly, 15000);
+
+// Same idea for the Tracked products tab: refresh prices every 10 seconds unless a button is busy.
+async function refreshProductsQuietly() {
+  if (document.hidden || parseHash().view !== 'products' || document.querySelector('.btn.loading')) return;
+  try { products = await api.listProducts(); } catch { return; }
+  $('productsEmpty').hidden = products.length > 0;
+  $('productList').replaceChildren(...products.map(productCard));
+}
+setInterval(refreshProductsQuietly, 10000);
+
 $('historyProduct').addEventListener('change', (e) => { history.replaceState(null, '', `#history=${e.target.value}`); renderHistory(e.target.value); });
 
 // ---------- settings ----------
